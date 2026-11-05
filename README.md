@@ -87,6 +87,7 @@ Você pode abrir o arquivo `.html` gerado em qualquer navegador para visualizar 
 ## Considerações do QA
 
 ### Estratégias Usadas
+- **Tratamento de Credenciais:** Tratamento de Credenciais nos testes. Variáveis definidas em `.env` (local), se fosse um ambiente com aberto não esta disponivel no repositorio, sendo evitado adicionando no gitignore.
 - **Page Object Model (POM):** Aplicado na camada de frontend (`cypress/pages/`) para separar os elementos da página e seletores das regras de negócio dos testes, garantindo facil manutenção.
 - **Abstração de API e Utilitários:** Funções auxiliares centralizadas em `cypress/support/` para gerenciar requisições HTTP, payloads e manipulação de dados de autenticação e reservas.
 - **Geração de Dados Dinâmicos:** Utilização da biblioteca `@faker-js/faker` para criar dados randômicos e independentes para cada execução de teste, evitando conflitos de estado.
