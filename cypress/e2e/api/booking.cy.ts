@@ -7,7 +7,9 @@ describe("Restful-Booker API", () => {
   let crTest: any
   let bookingId: number
   let bookingTestId: number
-  let urlApi = "https://restful-booker.herokuapp.com"
+  let urlApi: string
+  let user: any
+  let password: any
 
   const staticBooking = {
     firstname: "Carlos",
@@ -22,12 +24,18 @@ describe("Restful-Booker API", () => {
   }
 
   before(() => {
-    dados = utils.generateDados()
-    utils.createBooking(dados).then((response) => {
-      bookingId = response.body.bookingid
-    })
+    cy.env(["apiUser", "apiPass", "apiUrl"]).then((env) => {
+      user = env.apiUser || "admin"
+      password = env.apiPass || "password123"
+      urlApi = env.apiUrl || "https://restful-booker.herokuapp.com"
+      cy.log("ENV loaded:", { user, password, urlApi })
 
-    utils.authLogin("admin", "password123").then((response) => {
+      dados = utils.generateDados()
+      return utils.createBooking(dados, urlApi)
+    }).then((response) => {
+      bookingId = response.body.bookingid
+      return utils.authLogin(user, password, urlApi)
+    }).then((response) => {
       authToken = response.token
       expect(authToken).to.be.a("string").and.not.be.empty
     })
@@ -41,25 +49,25 @@ describe("Restful-Booker API", () => {
   })
 
   it("TC02 - Autenticacao com sucesso", () => {
-    utils.authLogin("admin", "password123").then((response) => {
+    utils.authLogin("admin", "password123", urlApi).then((response) => {
       expect(response).to.have.property("token").and.not.be.empty
     })
   })
 
   it("TC03 - Autenticacao usuario invalido", () => {
-    utils.authLogin("admi", "password123").then((response) => {
+    utils.authLogin("admi", "password123", urlApi).then((response) => {
       expect(response).to.have.property("reason", "Bad credentials")
     })
   })
 
   it("TC04 - Autenticacao senha invalida", () => {
-    utils.authLogin("admin", "passwod123").then((response) => {
+    utils.authLogin("admin", "passwod123", urlApi).then((response) => {
       expect(response).to.have.property("reason", "Bad credentials")
     })
   })
 
   it("TC05 - Autenticacao campos em branco/vazios", () => {
-    utils.authLogin("", "").then((response) => {
+    utils.authLogin("", "", urlApi).then((response) => {
       expect(response).to.have.property("reason", "Bad credentials")
     })
   })
@@ -113,7 +121,7 @@ describe("Restful-Booker API", () => {
 
   it("TC10 - Criar Reserva", () => {
     crTest = utils.generateDados()
-    utils.createBooking(crTest).then((response) => {
+    utils.createBooking(crTest, urlApi).then((response) => {
       utils.expectResponse(response.body.booking, crTest)
     })
   })
@@ -129,10 +137,10 @@ describe("Restful-Booker API", () => {
   it("TC12 - Alterar completamente reserva", () => {
     crTest = ""
     crTest = utils.generateDados()
-    utils.createBooking(crTest).then((response) => {
+    utils.createBooking(crTest, urlApi).then((response) => {
       bookingTestId = response.body.bookingid
       utils
-        .alterBookingCom(bookingTestId, authToken, staticBooking)
+        .alterBookingCom(bookingTestId, authToken, staticBooking, urlApi)
         .then((res) => {
           utils.expectResponse(res.body, staticBooking)
         })
@@ -142,9 +150,9 @@ describe("Restful-Booker API", () => {
   it("TC13 - Alterar completamente reserva token invalido", () => {
     crTest = ""
     crTest = utils.generateDados()
-    utils.createBooking(crTest).then((response) => {
+    utils.createBooking(crTest, urlApi).then((response) => {
       bookingTestId = response.body.bookingid
-      utils.alterBookingCom(bookingTestId, "sda", staticBooking).then((res) => {
+      utils.alterBookingCom(bookingTestId, "sda", staticBooking, urlApi).then((res) => {
         expect(res.status).to.eq(403)
       })
     })
@@ -153,8 +161,8 @@ describe("Restful-Booker API", () => {
   it("TC14 - Alterar completamente reserva id invalido", () => {
     crTest = ""
     crTest = utils.generateDados()
-    utils.createBooking(crTest).then((response) => {
-      utils.alterBookingCom(`s213`, authToken, staticBooking).then((res) => {
+    utils.createBooking(crTest, urlApi).then((_response) => {
+      utils.alterBookingCom(`s213`, authToken, staticBooking, urlApi).then((res) => {
         expect(res.status).to.eq(405)
       })
     })
@@ -163,10 +171,10 @@ describe("Restful-Booker API", () => {
   it("TC15 - Alterar parcialmente reserva", () => {
     crTest = ""
     crTest = utils.generateDados()
-    utils.createBooking(crTest).then((response) => {
+    utils.createBooking(crTest, urlApi).then((response) => {
       bookingTestId = response.body.bookingid
       utils
-        .alterBookingPar(bookingTestId, authToken, staticBooking)
+        .alterBookingPar(bookingTestId, authToken, staticBooking, urlApi)
         .then((res) => {
           expect(res.body).to.have.property(
             "firstname",
@@ -194,9 +202,9 @@ describe("Restful-Booker API", () => {
   it("TC16 - Alterar parcialmente reserva token invalido", () => {
     crTest = ""
     crTest = utils.generateDados()
-    utils.createBooking(crTest).then((response) => {
+    utils.createBooking(crTest, urlApi).then((response) => {
       bookingTestId = response.body.bookingid
-      utils.alterBookingPar(bookingTestId, "sda", staticBooking).then((res) => {
+      utils.alterBookingPar(bookingTestId, "sda", staticBooking, urlApi).then((res) => {
         expect(res.status).to.eq(403)
       })
     })
@@ -205,9 +213,9 @@ describe("Restful-Booker API", () => {
   it("TC17 - Alterar parcialmente reserva id invalido", () => {
     crTest = ""
     crTest = utils.generateDados()
-    utils.createBooking(crTest).then((response) => {
+    utils.createBooking(crTest, urlApi).then((response) => {
       bookingTestId = response.body.bookingid
-      utils.alterBookingPar(123934, authToken, staticBooking).then((res) => {
+      utils.alterBookingPar(123934, authToken, staticBooking, urlApi).then((res) => {
         expect(res.status).to.eq(405)
       })
     })
@@ -216,9 +224,9 @@ describe("Restful-Booker API", () => {
   it("TC18 - Excluir reserva", () => {
     crTest = ""
     crTest = utils.generateDados()
-    utils.createBooking(crTest).then((response) => {
+    utils.createBooking(crTest, urlApi).then((response) => {
       bookingTestId = response.body.bookingid
-      utils.deleteBooking(bookingTestId, authToken).then((res) => {
+      utils.deleteBooking(bookingTestId, authToken, urlApi).then((res) => {
         expect(res.status).to.eq(201)
         expect(res.body).to.eq(`Created`)
       })
@@ -228,9 +236,9 @@ describe("Restful-Booker API", () => {
   it("TC19 - Excluir reserva param invalido", () => {
     crTest = ""
     crTest = utils.generateDados()
-    utils.createBooking(crTest).then((response) => {
+    utils.createBooking(crTest, urlApi).then((_response) => {
       bookingTestId = 1230927
-      utils.deleteBooking(bookingTestId, authToken).then((res) => {
+      utils.deleteBooking(bookingTestId, authToken, urlApi).then((res) => {
         expect(res.status).to.eq(405)
       })
     })

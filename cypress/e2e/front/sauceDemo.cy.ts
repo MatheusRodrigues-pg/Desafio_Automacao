@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import {
   LoginPage,
   InventoryPage,
@@ -7,18 +9,24 @@ import {
 } from "../../pages/saucePages"
 import * as utils from "../../support/utilsFront"
 
-let userSucess = "standard_user"
-let userInvalid = "user"
-let userBlocked = "standard_user"
-let userVisualError = "visual_user"
-let passwordSucess = "secret_sauce"
-
 describe("SauceDemo", () => {
-  before(() => {})
+  let username: string
+  let userLocked: string
+  let userVisual: string
+  let password: string
+
+  before(() => {
+    cy.env(["saucedemoUsername", "saucedemoPassword","saucedemoUserLocked","saucedemoUserVisual"]).then((env) => {
+      username = env.saucedemoUsername
+      password = env.saucedemoPassword
+      userLocked = env.saucedemoUserLocked
+      userVisual = env.saucedemoUserVisual
+    })
+  })
 
   it("UI01 - Login usuario invalido", () => {
     LoginPage.visit()
-    LoginPage.login(userInvalid, passwordSucess)
+    LoginPage.login("user", password)
     utils.validarTexto(
       LoginPage.errorMessage,
       "Epic sadface: Username and password do not match any user in this service",
@@ -27,12 +35,12 @@ describe("SauceDemo", () => {
   })
   it("UI02 - Cenario de erro Login com sucesso esperado", () => {
     LoginPage.visit()
-    LoginPage.login(userInvalid, passwordSucess)
+    LoginPage.login("user", password)
     utils.validarUrlExata(InventoryPage.url)
   })
   it("UI03 - Login usuario valido", () => {
     LoginPage.visit()
-    LoginPage.login(userSucess, passwordSucess)
+    LoginPage.login(username, password)
     utils.validarUrlExata(InventoryPage.url)
   })
 
@@ -48,7 +56,7 @@ describe("SauceDemo", () => {
 
   it("UI05 - Login usuario bloqueado", () => {
     LoginPage.visit()
-    LoginPage.login(userBlocked, passwordSucess)
+    LoginPage.login(userLocked, password)
     utils.validarTexto(
       LoginPage.errorMessage,
       "Epic sadface: Sorry, this user has been locked out.",
@@ -58,7 +66,7 @@ describe("SauceDemo", () => {
 
   it("UI06 - Adicionar e Remover Itens do carrinho", () => {
     LoginPage.visit()
-    LoginPage.login(userSucess, passwordSucess)
+    LoginPage.login(username, password)
     utils.validarUrlExata(InventoryPage.url)
     utils.clicar('[data-test="add-to-cart-sauce-labs-bike-light"]')
     utils.clicar('[data-test="add-to-cart-sauce-labs-onesie"]')
@@ -71,9 +79,9 @@ describe("SauceDemo", () => {
     utils.validarNaoExiste(InventoryPage.cartBadge)
   })
 
-  it("UI07 - Pedido comfirmado", () => {
+  it("UI07 - Pedido confirmado", () => {
     LoginPage.visit()
-    LoginPage.login(userSucess, passwordSucess)
+    LoginPage.login(username, password)
     utils.validarUrlExata(InventoryPage.url)
     utils.clicar('[data-test="add-to-cart-sauce-labs-bike-light"]')
     utils.clicar('[data-test="add-to-cart-sauce-labs-onesie"]')
@@ -107,7 +115,7 @@ describe("SauceDemo", () => {
 
   it("UI08 - Login usuario com erros visuais", () => {
     LoginPage.visit()
-    LoginPage.login(userVisualError, passwordSucess)
+    LoginPage.login(userVisual, password)
     utils.validarUrlExata(InventoryPage.url)
     cy.screenshot()
     utils.clicar('[data-test="add-to-cart-sauce-labs-backpack"]')
