@@ -7,35 +7,36 @@ import {
 } from "../../pages/saucePages"
 import * as utils from "../../support/utilsFront"
 
-let userSucess = 'standard_user'
-let userInvalid = 'user'
-let userBlocked = 'standard_user'
-let userVisualError = 'visual_user'
-let passwordSucess = 'secret_sauce'
+let userSucess = "standard_user"
+let userInvalid = "user"
+let userBlocked = "standard_user"
+let userVisualError = "visual_user"
+let passwordSucess = "secret_sauce"
 
 describe("SauceDemo", () => {
   before(() => {})
 
-  it("Login usuario invalido", () => {
+  it("UI01 - Login usuario invalido", () => {
     LoginPage.visit()
     LoginPage.login(userInvalid, passwordSucess)
-    utils.validarTexto(LoginPage.errorMessage,
+    utils.validarTexto(
+      LoginPage.errorMessage,
       "Epic sadface: Username and password do not match any user in this service",
     )
     utils.validarUrlExata(LoginPage.url)
   })
-    it("Cenario de erro Login com sucesso esperado", () => {
+  it("UI02 - Cenario de erro Login com sucesso esperado", () => {
     LoginPage.visit()
     LoginPage.login(userInvalid, passwordSucess)
     utils.validarUrlExata(InventoryPage.url)
   })
-  it("Login usuario valido", () => {
+  it("UI03 - Login usuario valido", () => {
     LoginPage.visit()
     LoginPage.login(userSucess, passwordSucess)
     utils.validarUrlExata(InventoryPage.url)
   })
 
-  it("Login campos vazios", () => {
+  it("UI04 - Login campos vazios", () => {
     LoginPage.visit()
     utils.clicar(LoginPage.loginButton)
     utils.validarTexto(
@@ -45,7 +46,7 @@ describe("SauceDemo", () => {
     utils.validarUrlExata(LoginPage.url)
   })
 
-  it("Login usuario bloqueado", () => {
+  it("UI05 - Login usuario bloqueado", () => {
     LoginPage.visit()
     LoginPage.login(userBlocked, passwordSucess)
     utils.validarTexto(
@@ -55,7 +56,7 @@ describe("SauceDemo", () => {
     utils.validarUrlExata(LoginPage.url)
   })
 
-  it("Adicionar e Remover Itens do carrinho", () => {
+  it("UI06 - Adicionar e Remover Itens do carrinho", () => {
     LoginPage.visit()
     LoginPage.login(userSucess, passwordSucess)
     utils.validarUrlExata(InventoryPage.url)
@@ -70,7 +71,7 @@ describe("SauceDemo", () => {
     utils.validarNaoExiste(InventoryPage.cartBadge)
   })
 
-  it("Pedido comfirmado", () => {
+  it("UI07 - Pedido comfirmado", () => {
     LoginPage.visit()
     LoginPage.login(userSucess, passwordSucess)
     utils.validarUrlExata(InventoryPage.url)
@@ -104,7 +105,7 @@ describe("SauceDemo", () => {
     )
   })
 
-  it("Login usuario com erros visuais", () => {
+  it("UI08 - Login usuario com erros visuais", () => {
     LoginPage.visit()
     LoginPage.login(userVisualError, passwordSucess)
     utils.validarUrlExata(InventoryPage.url)
